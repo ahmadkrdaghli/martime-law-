@@ -1,0 +1,429 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Maritime Law Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:#010812; --surface:#061828; --card:#0a2040; --border:rgba(16,80,160,0.25);
+  --fg:#b0cce8; --white:#e4f0fc; --mist:#7090b8; --fog:#3a5878;
+  --gold:#c89010; --gold-m:#e0aa20; --gold-hi:#f8cc48;
+  --signal:#00d8ff; --steel:#1a6ac8; --sky:#2888e8;
+  --correct:#00c87a; --wrong:#e03050;
+  --rule-bg:rgba(0,216,255,0.06); --rule-bdr:rgba(0,216,255,0.22);
+  --font-en:'Barlow Condensed',sans-serif; --font-ar:'Tajawal',sans-serif;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font-ar);background:var(--bg);color:var(--fg);min-height:100%;overflow-x:hidden}
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.page{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:32px 20px 80px}
+.header{text-align:center;margin-bottom:36px}
+.header-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-en);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-m);border:1px solid rgba(200,144,16,.3);background:rgba(200,144,16,.06);padding:5px 18px;border-radius:20px;margin-bottom:16px}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold-m);box-shadow:0 0 6px var(--gold-m)}
+.header h1{font-family:var(--font-en);font-size:clamp(26px,5.5vw,44px);font-weight:800;color:var(--white);letter-spacing:1px;line-height:1;margin-bottom:6px}
+.header h1 em{font-style:normal;color:var(--gold-hi)}
+.header-sub{font-family:var(--font-ar);font-size:13px;color:var(--signal);margin-bottom:24px;direction:rtl}
+.controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.ctrl-left{display:flex;align-items:center;gap:10px}
+.q-counter{font-family:var(--font-en);font-size:13px;letter-spacing:1px;color:var(--mist)}
+.q-counter strong{color:var(--white);font-size:16px}
+.timer-wrap{display:flex;align-items:center;gap:8px}
+.timer-ring{position:relative;width:44px;height:44px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring circle{fill:none;stroke-width:3}
+.timer-track{stroke:rgba(16,80,160,.3)}
+.timer-arc{stroke:var(--signal);stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s}
+.timer-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-en);font-size:13px;font-weight:700;color:var(--white)}
+.score-pill{font-family:var(--font-en);font-size:12px;font-weight:700;letter-spacing:1.5px;padding:5px 14px;border-radius:20px;border:1px solid rgba(200,144,16,.3);background:rgba(200,144,16,.08);color:var(--gold-hi)}
+.btn-shuffle{font-family:var(--font-en);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:8px 20px;border-radius:10px;cursor:pointer;border:1px solid rgba(26,106,200,.35);background:rgba(26,106,200,.15);color:var(--sky);transition:background .2s,border-color .2s}
+.btn-shuffle:hover{background:rgba(26,106,200,.28);border-color:rgba(40,136,232,.6)}
+.progress-bar{height:3px;border-radius:2px;background:rgba(16,80,160,.2);margin-bottom:28px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--steel),var(--signal));transition:width .4s ease}
+.q-card{background:linear-gradient(145deg,rgba(6,24,40,.95),rgba(10,32,64,.9));border:1px solid var(--border);border-radius:20px;overflow:hidden;position:relative;animation:cardIn .45s cubic-bezier(.16,1,.3,1)}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.q-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--steel),var(--signal),var(--sky))}
+.q-card-inner{padding:32px 28px 28px}
+.q-num{font-family:var(--font-en);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--signal);margin-bottom:14px;display:block}
+.q-source{font-family:var(--font-en);font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:14px;display:inline-block}
+.q-source.marpol{background:rgba(0,200,122,.1);border:1px solid rgba(0,200,122,.3);color:var(--correct)}
+.q-source.solas{background:rgba(0,216,255,.1);border:1px solid rgba(0,216,255,.3);color:var(--signal)}
+.q-source.isps{background:rgba(248,204,72,.1);border:1px solid rgba(248,204,72,.3);color:var(--gold-hi)}
+.q-source.stcw{background:rgba(200,100,255,.1);border:1px solid rgba(200,100,255,.3);color:#d090ff}
+.q-source.mlc{background:rgba(255,140,60,.1);border:1px solid rgba(255,140,60,.3);color:#ff9a50}
+.q-source.ism{background:rgba(255,80,120,.1);border:1px solid rgba(255,80,120,.3);color:#ff6090}
+.q-source.law{background:rgba(100,180,255,.1);border:1px solid rgba(100,180,255,.3);color:#80c4ff}
+.q-source.imo{background:rgba(80,220,180,.1);border:1px solid rgba(80,220,180,.3);color:#50e0b0}
+.q-text{font-size:clamp(15px,2.5vw,17px);font-weight:600;color:var(--white);line-height:1.8;margin-bottom:28px;direction:rtl;text-align:right}
+.options{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:12px;cursor:pointer;background:rgba(6,24,40,.6);border:1px solid rgba(16,80,160,.2);transition:border-color .2s,background .2s,transform .15s;font-size:14px;color:var(--fg);direction:rtl;text-align:right;line-height:1.6}
+.opt:hover:not(.disabled){border-color:rgba(40,136,232,.5);background:rgba(10,40,80,.7);transform:translateX(3px)}
+.opt.disabled{cursor:default}
+.opt-letter{font-family:var(--font-en);font-size:12px;font-weight:700;letter-spacing:1px;width:24px;height:24px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(16,80,160,.2);border:1px solid rgba(16,80,160,.35);color:var(--sky);margin-top:2px;transition:background .2s,border-color .2s;order:2}
+.opt span:first-child{order:1}
+.opt.correct{background:rgba(0,200,122,.1);border-color:rgba(0,200,122,.45)}
+.opt.correct .opt-letter{background:var(--correct);border-color:var(--correct);color:#000}
+.opt.wrong{background:rgba(224,48,80,.1);border-color:rgba(224,48,80,.45)}
+.opt.wrong .opt-letter{background:var(--wrong);border-color:var(--wrong);color:#fff}
+.rule-panel{margin-top:18px;padding:16px 18px;border-radius:14px;background:var(--rule-bg);border:1px solid var(--rule-bdr);display:none}
+.rule-panel.show{display:block;animation:fadeUp .35s .1s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.rule-panel-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.rule-badge{font-family:var(--font-en);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--signal);background:rgba(0,216,255,.1);border:1px solid rgba(0,216,255,.25);padding:3px 10px;border-radius:20px;white-space:nowrap}
+.page-badge{font-family:var(--font-en);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gold-m);background:rgba(200,144,16,.08);border:1px solid rgba(200,144,16,.25);padding:3px 10px;border-radius:20px;white-space:nowrap}
+.rule-text{font-size:13px;color:var(--fg);line-height:1.8;direction:rtl;text-align:right}
+.btn-next{width:100%;margin-top:22px;font-family:var(--font-en);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,rgba(16,80,160,.35),rgba(26,106,200,.3));border:1px solid rgba(26,106,200,.4);color:var(--sky);transition:background .2s,border-color .2s;display:none}
+.btn-next:hover{background:linear-gradient(135deg,rgba(16,80,160,.55),rgba(26,106,200,.5));border-color:rgba(40,136,232,.7)}
+.btn-next.show{display:block;animation:fadeUp .3s .15s both}
+.results{text-align:center;display:none;animation:cardIn .5s cubic-bezier(.16,1,.3,1)}
+.results.show{display:block}
+.results-ring{margin:0 auto 24px;width:130px;height:130px;position:relative}
+.results-ring svg{transform:rotate(-90deg)}
+.results-ring circle{fill:none;stroke-width:9}
+.results-score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rs-num{font-family:var(--font-en);font-size:38px;font-weight:800;color:var(--white);line-height:1}
+.rs-denom{font-family:var(--font-en);font-size:14px;color:var(--mist);margin-top:2px}
+.results h2{font-family:var(--font-en);font-size:28px;font-weight:800;color:var(--white);margin-bottom:8px}
+.results-grade{font-family:var(--font-en);font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-m);margin-bottom:28px}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.rstat{background:rgba(6,24,40,.8);border:1px solid var(--border);border-radius:14px;padding:16px 10px}
+.rstat-val{font-family:var(--font-en);font-size:28px;font-weight:800;color:var(--white)}
+.rstat-lbl{font-size:11px;color:var(--fog);margin-top:4px}
+.weak-rules-section{margin-bottom:28px;text-align:right;direction:rtl;background:rgba(224,48,80,.06);border:1px solid rgba(224,48,80,.2);border-radius:16px;padding:20px 20px 18px;display:none}
+.weak-rules-section.show{display:block}
+.weak-rules-title{font-size:16px;font-weight:700;color:var(--wrong);margin-bottom:4px}
+.weak-rules-sub{font-size:12px;color:var(--fog);margin-bottom:16px}
+.weak-rule-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;text-align:right;direction:rtl}
+.weak-rule-num{font-family:var(--font-en);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--signal);background:rgba(0,216,255,.08);border:1px solid rgba(0,216,255,.2);padding:2px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.weak-rule-name{font-size:13px;color:var(--fg);line-height:1.6}
+.btn-restart{font-family:var(--font-en);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px 40px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,rgba(200,144,16,.2),rgba(248,204,72,.15));border:1px solid rgba(200,144,16,.4);color:var(--gold-hi);transition:background .2s}
+.btn-restart:hover{background:linear-gradient(135deg,rgba(200,144,16,.38),rgba(248,204,72,.3))}
+.timeout-flash{position:fixed;inset:0;z-index:50;pointer-events:none;background:rgba(224,48,80,.12);opacity:0}
+.timeout-flash.flash{animation:flashAnim .6s ease}
+@keyframes flashAnim{0%,100%{opacity:0}30%{opacity:1}}
+@media(max-width:520px){.q-card-inner{padding:22px 16px 18px}.opt{padding:12px 14px;font-size:13px}.controls{flex-direction:column;align-items:flex-start}.results-grid{grid-template-columns:repeat(3,1fr);gap:8px}}
+</style>
+
+<canvas id="bgCanvas"></canvas>
+<div class="timeout-flash" id="timeoutFlash"></div>
+
+<div class="page">
+  <div class="header">
+    <div class="header-badge"><span class="badge-dot"></span>MARITIME LAW<span class="badge-dot"></span></div>
+    <h1>MARITIME <em>LAW</em></h1>
+    <div class="header-sub">اختبار القانون البحري الدولي</div>
+  </div>
+
+  <div id="quizArea">
+    <div class="controls">
+      <div class="ctrl-left">
+        <div class="q-counter">السؤال <strong id="qNum">1</strong> / <span id="qTotal">65</span></div>
+        <div class="timer-wrap">
+          <div class="timer-ring">
+            <svg width="44" height="44" viewBox="0 0 44 44">
+              <circle class="timer-track" cx="22" cy="22" r="19"/>
+              <circle class="timer-arc" id="timerArc" cx="22" cy="22" r="19" stroke-dasharray="119.4" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-val" id="timerVal">60</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="score-pill">✓ <span id="scoreDisplay">0</span> / <span id="scoreDenom">0</span></div>
+        <button class="btn-shuffle" onclick="shuffleAndRestart()">⇄ SHUFFLE</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="q-card" id="qCard">
+      <div class="q-card-inner">
+        <span class="q-num" id="qNumBadge">Q 01</span>
+        <span class="q-source" id="qSource">MARPOL</span>
+        <div class="q-text" id="qText"></div>
+        <div class="options" id="optionsContainer"></div>
+        <div class="rule-panel" id="rulePanel">
+          <div class="rule-panel-header">
+            <span class="rule-badge" id="ruleBadge"></span>
+            <span class="page-badge" id="pageBadge"></span>
+          </div>
+          <div class="rule-text" id="ruleText"></div>
+        </div>
+        <button class="btn-next" id="btnNext" onclick="nextQ()">التالي ←</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="results" id="resultsScreen">
+    <div class="results-ring">
+      <svg width="130" height="130" viewBox="0 0 130 130">
+        <circle class="timer-track" cx="65" cy="65" r="56" stroke="rgba(16,80,160,.2)"/>
+        <circle id="resultsArc" cx="65" cy="65" r="56" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="351.9" stroke-dashoffset="351.9"/>
+      </svg>
+      <div class="results-score-text">
+        <span class="rs-num" id="rsNum">0</span>
+        <span class="rs-denom" id="rsDenom">/50</span>
+      </div>
+    </div>
+    <h2 id="resultsTitle">النتيجة</h2>
+    <div class="results-grade" id="resultsGrade"></div>
+    <div class="results-grid">
+      <div class="rstat"><div class="rstat-val" id="rsCorrect">0</div><div class="rstat-lbl">إجابات صحيحة</div></div>
+      <div class="rstat"><div class="rstat-val" id="rsWrong">0</div><div class="rstat-lbl">إجابات خاطئة</div></div>
+      <div class="rstat"><div class="rstat-val" id="rsTimeout">0</div><div class="rstat-lbl">انتهى الوقت</div></div>
+    </div>
+    <div class="weak-rules-section" id="weakRulesSection">
+      <div class="weak-rules-title">⚠ المواضيع التي تحتاج مراجعة</div>
+      <div class="weak-rules-sub">راجع هذه المواضيع قبل إعادة الاختبار</div>
+      <div id="weakRulesList"></div>
+    </div>
+    <button class="btn-restart" onclick="shuffleAndRestart()">↺ إعادة الاختبار</button>
+  </div>
+</div>
+
+<script>
+/* ── STAR BACKGROUND ── */
+(function(){
+  const c=document.getElementById('bgCanvas'),ctx=c.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;stars=Array.from({length:140},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.2,a:Math.random(),s:Math.random()*.4+.1}))}
+  resize();window.addEventListener('resize',resize);
+  function tick(){ctx.clearRect(0,0,W,H);stars.forEach(s=>{s.a+=s.s*.012;if(s.a>1)s.s*=-1;if(s.a<0){s.s*=-1;s.x=Math.random()*W;s.y=Math.random()*H}ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.28);ctx.fillStyle=`rgba(180,220,255,${s.a*.7})`;ctx.fill()});requestAnimationFrame(tick)}
+  tick();
+})();
+
+/* ── TOPIC NAMES ── */
+const TOPICS = {
+  'law-intro':    'مصادر وأهمية القانون البحري',
+  'navigation':   'أنواع الملاحة البحرية',
+  'imo':          'المنظمة البحرية الدولية IMO',
+  'ship-id':      'العلامات المميزة للسفينة والاسم',
+  'nationality':  'موطن وجنسية السفينة',
+  'registration': 'تسجيل السفينة وشهادة التسجيل',
+  'inspection':   'معاينة السفينة',
+  'isps':         'مدونة ISPS',
+  'stcw':         'اتفاقية STCW',
+  'mlc':          'اتفاقية العمل البحري MLC',
+  'marpol':       'اتفاقية MARPOL',
+  'ism':          'نظام إدارة السلامة ISM',
+};
+
+/* ── QUESTION BANK ── */
+const BANK = [
+  // ══ القانون البحري – مصادر وأهمية ══
+  {q:"ما هي أنواع القانون البحري؟",opts:["القانون البحري المدني، التجاري، الدولي","القانون البحري الإداري، المدني، البيئي","القانون البحري الدولي العام، الإداري، الجنائي","القانون البحري الخاص، العام، الجنائي"],a:2,topic:'law-intro',src:'القانون البحري',page:'مصادر وأهمية',ruleText:"القانون البحري يشمل: القانون البحري الدولي العام، الإداري، الجنائي."},
+  {q:"القانون البحري يهتم بشكل أساسي بـ:",opts:["تنظيم الملاحة النهرية","ضبط العلاقات بين الدول البحرية فقط","تنظيم إدارة وتشغيل السفن وصلاحيتها والبيئة البحرية","تسجيل السفن فقط"],a:2,topic:'law-intro',src:'القانون البحري',page:'مصادر وأهمية',ruleText:"القانون البحري يهتم بشكل أساسي بتنظيم إدارة وتشغيل السفن وصلاحيتها والبيئة البحرية."},
+  {q:"لا يمكن أداء الرحلة البحرية على أكمل وجه دون:",opts:["خبرة الطاقم في الطقس فقط","دراية كاملة بالقانون البحري","استخدام سفن كبيرة","مراقبة مستمرة من الدولة"],a:1,topic:'law-intro',src:'القانون البحري',page:'مصادر وأهمية',ruleText:"لا يمكن أداء الرحلة البحرية على أكمل وجه دون دراية كاملة بالقانون البحري."},
+  {q:"ما هو تعريف القانون البحري؟",opts:["هو قانون تنظيم الموانئ","هو القانون الخاص بالتجارة البحرية فقط","مجموعة القواعد القانونية التي تحكم الملاحة البحرية","القانون الذي ينظم العلاقات السياسية بين الدول البحرية"],a:2,topic:'law-intro',src:'القانون البحري',page:'مصادر وأهمية',ruleText:"القانون البحري هو مجموعة القواعد القانونية التي تحكم الملاحة البحرية."},
+  {q:"ما هو تعريف الملاحة البحرية؟",opts:["هي الملاحة الجوية","الملاحة التي تتم في البحر بمنشآت عائمة عرضة لمخاطر البحر","الملاحة بين الأنهار فقط","ملاحة ناقلات النفط فقط"],a:1,topic:'law-intro',src:'القانون البحري',page:'مصادر وأهمية',ruleText:"الملاحة البحرية هي الملاحة التي تتم في البحر بمنشآت عائمة عرضة لمخاطر البحر."},
+  {q:"ما هي أنواع الملاحة البحرية حسب طول الرحلة؟",opts:["ملاحة داخلية وخارجية","ملاحة سياحية وتجارية","ملاحة أعالي البحار وملاحة ساحلية","ملاحة ليلية ونهارية"],a:2,topic:'navigation',src:'القانون البحري',page:'أنواع الملاحة',ruleText:"أنواع الملاحة البحرية حسب طول الرحلة: ملاحة أعالي البحار وملاحة ساحلية."},
+  {q:"الملاحة بين موانئ دول أجنبية مهما كانت المسافة تسمى:",opts:["ملاحة ساحلية","ملاحة داخلية","ملاحة أعالي البحار","ملاحة نهرية"],a:2,topic:'navigation',src:'القانون البحري',page:'أنواع الملاحة',ruleText:"الملاحة بين موانئ دول أجنبية مهما كانت المسافة تسمى ملاحة أعالي البحار."},
+  {q:"الملاحة التي تتم بين موانئ الدولة الواحدة تسمى:",opts:["ملاحة دولية","ملاحة عابرة","ملاحة ساحلية","ملاحة إقليمية"],a:2,topic:'navigation',src:'القانون البحري',page:'أنواع الملاحة',ruleText:"الملاحة التي تتم بين موانئ الدولة الواحدة تسمى ملاحة ساحلية."},
+  // ══ IMO ══
+  {q:"من أهداف المنظمة البحرية الدولية:",opts:["تنظيم السياحة البحرية فقط","تطوير اقتصاد الموانئ","وضع آلية للتعاون في السلامة البحرية وحماية الأرواح","إدارة الموانئ الخاصة"],a:2,topic:'imo',src:'IMO',page:'أهداف IMO',ruleText:"من أهداف المنظمة البحرية الدولية: وضع آلية للتعاون في السلامة البحرية وحماية الأرواح."},
+  {q:"لا تشمل أهداف المنظمة البحرية الدولية ما يلي ما عدا:",opts:["مكافحة التلوث البحري","رفع علم الدولة على الطائرات","إعداد الاتفاقيات الملاحية الدولية","تنظيم حركة النقل البحري"],a:1,topic:'imo',src:'IMO',page:'أهداف IMO',ruleText:"رفع علم الدولة على الطائرات ليس من أهداف المنظمة البحرية الدولية."},
+  // ══ العلامات المميزة للسفينة ══
+  {q:"يجب أن تحمل كل سفينة:",opts:["رقم تسجيل فقط","علم دولي","اسما خاصا بها","جنسية مزدوجة"],a:2,topic:'ship-id',src:'القانون البحري',page:'العلامات المميزة للسفينة',ruleText:"يجب أن تحمل كل سفينة اسماً خاصاً بها."},
+  {q:"لا يحق لمالك السفينة الاحتفاظ بالاسم إذا:",opts:["تغير القبطان","انتهى التسجيل أو بيعت السفينة لأجنبي","تغير لون الطلاء","ابتعرت السفينة خارج المياه الإقليمية"],a:1,topic:'ship-id',src:'القانون البحري',page:'العلامات المميزة للسفينة',ruleText:"لا يحق لمالك السفينة الاحتفاظ بالاسم إذا انتهى التسجيل أو بيعت السفينة لأجنبي."},
+  {q:"في حال طمس اسم السفينة عمداً:",opts:["لا توجد عقوبة","يعاقب بالسجن فقط","يعاقب بالغرامة فقط","يعاقب بالحبس والغرامة أو إحداهما"],a:3,topic:'ship-id',src:'القانون البحري',page:'العلامات المميزة للسفينة',ruleText:"في حال طمس اسم السفينة عمداً يعاقب بالحبس والغرامة أو إحداهما."},
+  // ══ موطن وجنسية السفينة ══
+  {q:"ما هو موطن السفينة؟",opts:["دولة المالك","الدولة التي بُنيت فيها","الميناء الذي تسجل فيه","أقرب ميناء تصل إليه"],a:2,topic:'nationality',src:'القانون البحري',page:'موطن وجنسية السفينة',ruleText:"موطن السفينة هو الميناء الذي تسجل فيه."},
+  {q:"ما المقصود بجنسية السفينة؟",opts:["اسمها التجاري","لونها وميناؤها","الرابطة القانونية بينها وبين دولة العلم","الدولة التي صنعت محركها"],a:2,topic:'nationality',src:'القانون البحري',page:'موطن وجنسية السفينة',ruleText:"جنسية السفينة هي الرابطة القانونية بينها وبين دولة العلم."},
+  {q:"أهمية جنسية السفينة تشمل جميع ما يلي ما عدا:",opts:["التمتع بحماية الدولة","التمتع بالقضاء الدولي","رفع علم الدولة","الخضوع للسلطة القضائية"],a:1,topic:'nationality',src:'القانون البحري',page:'موطن وجنسية السفينة',ruleText:"التمتع بالقضاء الدولي ليس من أهمية جنسية السفينة."},
+  {q:"من شروط اكتساب الجنسية:",opts:["شرط التجهيز البحري","شرط العلم الملون","شرط البناء الوطني وشرط الملكية الوطنية","شرط الملاحة الداخلية"],a:2,topic:'nationality',src:'القانون البحري',page:'موطن وجنسية السفينة',ruleText:"من شروط اكتساب الجنسية: شرط البناء الوطني وشرط الملكية الوطنية."},
+  {q:"ميزة التسجيل المفتوح لا تشمل:",opts:["سهولة الإجراءات","السماح بطواقم أجنبية","إعفاء السفينة من دفع ضرائب نهائياً","عدم فرض ضرائب محلية كبيرة"],a:2,topic:'nationality',src:'القانون البحري',page:'موطن وجنسية السفينة',ruleText:"إعفاء السفينة من دفع ضرائب نهائياً ليس من ميزات التسجيل المفتوح."},
+  {q:"من عيوب التسجيل المفتوح:",opts:["الرقابة المشددة","عدم السماح بتسجيل السفينة","ضعف الرقابة وصلاحية الملاحة","ارتفاع الضرائب"],a:2,topic:'nationality',src:'القانون البحري',page:'موطن وجنسية السفينة',ruleText:"من عيوب التسجيل المفتوح: ضعف الرقابة وصلاحية الملاحة."},
+  // ══ شهادة التسجيل ══
+  {q:"متى تصدر شهادة تسجيل جديدة للسفينة؟",opts:["عند تغيير طاقم السفينة","عند تغيير اسمها فقط","عند بناء سفينة جديدة أو انتقال الملكية","عند رسوها في ميناء دولي"],a:2,topic:'registration',src:'القانون البحري',page:'شهادة التسجيل',ruleText:"تصدر شهادة تسجيل جديدة للسفينة عند بناء سفينة جديدة أو انتقال الملكية."},
+  {q:"من أسباب شطب شهادة التسجيل:",opts:["إذا زادت سرعة السفينة","إذا تم تجديد الطلاء","إذا هلكت السفينة أو انتقلت ملكيتها لأجنبي","إذا شاركت السفينة في سباق بحري"],a:2,topic:'registration',src:'القانون البحري',page:'شهادة التسجيل',ruleText:"من أسباب شطب شهادة التسجيل: إذا هلكت السفينة أو انتقلت ملكيتها لأجنبي."},
+  {q:"شهادة التسجيل المؤقتة تصدر:",opts:["بعد 10 سنوات من تسجيل السفينة","فقط داخل المياه الإقليمية","إذا لم تستوف السفينة الإجراءات","إذا تجاوزت السفينة الحمولة"],a:2,topic:'registration',src:'القانون البحري',page:'شهادة التسجيل',ruleText:"شهادة التسجيل المؤقتة تصدر إذا لم تستوف السفينة الإجراءات."},
+  {q:"مدة شهادة التسجيل المؤقتة في مصر هي:",opts:["سنة واحدة","ثلاثة أشهر","ستة شهور قابلة للتجديد","شهرين فقط"],a:2,topic:'registration',src:'القانون البحري',page:'شهادة التسجيل',ruleText:"مدة شهادة التسجيل المؤقتة في مصر ستة شهور قابلة للتجديد."},
+  // ══ السفن المعفاة من التسجيل ══
+  {q:"من السفن المعفاة من التسجيل:",opts:["ناقلات النفط الضخمة","السفن السياحية","سفن النزهة الصغيرة التي لا تبرح خارج المياه الإقليمية","السفن الأجنبية العابرة"],a:2,topic:'registration',src:'القانون البحري',page:'السفن المعفاة من التسجيل',ruleText:"من السفن المعفاة من التسجيل: سفن النزهة الصغيرة التي لا تبرح خارج المياه الإقليمية."},
+  {q:"السفن الحربية والسفن الحكومية:",opts:["لا تسجل إطلاقاً","تسجل في نفس سجل السفن التجارية","لا تحتاج إلى تسجيل","تسجل في سجلات خاصة"],a:3,topic:'registration',src:'القانون البحري',page:'السفن المعفاة من التسجيل',ruleText:"السفن الحربية والسفن الحكومية تسجل في سجلات خاصة."},
+  // ══ معاينة السفينة ══
+  {q:"المعاينة التي تجرى عند بناء السفينة هي:",opts:["المعاينة الدورية","المعاينة الابتدائية","المعاينة السنوية","المعاينة النهائية"],a:1,topic:'inspection',src:'القانون البحري',page:'معاينة السفينة',ruleText:"المعاينة التي تجرى عند بناء السفينة هي المعاينة الابتدائية."},
+  {q:"المعاينة التي تجرى كل سنة تسمى:",opts:["المعاينة التجديدية","المعاينة المتوسطة","المعاينة السنوية","المعاينة الخارجية"],a:2,topic:'inspection',src:'القانون البحري',page:'معاينة السفينة',ruleText:"المعاينة التي تجرى كل سنة تسمى المعاينة السنوية."},
+  {q:"المعاينة التي تجرى عند انتهاء جميع المعاينات الأخرى تسمى:",opts:["المعاينة الإضافية","المعاينة النهائية","المعاينة الابتدائية","معاينة الحوض"],a:1,topic:'inspection',src:'القانون البحري',page:'معاينة السفينة',ruleText:"المعاينة التي تجرى عند انتهاء جميع المعاينات الأخرى تسمى المعاينة النهائية."},
+  // ══ ISPS Code ══
+  {q:"ما هو المقصود بـ ISPS Code؟",opts:["المدة الدولية لصيانة السفن والبضائع","المدة الدولية لأمن السفن والمرافق المينائية","نظام تفتيش السفن في الميناء","اتفاقية دولية لحماية البيئة البحرية"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"ISPS Code هو المدة الدولية لأمن السفن والمرافق المينائية."},
+  {q:"ما هو الهدف الرئيسي من ISPS Code؟",opts:["تنظيم نقل الركاب عبر البحر","ضمان السلامة من الحريق على السفن","وضع إطار للتعاون بين الحكومات والجهات العاملة في النقل البحري لتعزيز أمن السفن والموانئ","تقليل الحوادث البحرية البحرية فقط"],a:2,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"الهدف الرئيسي من ISPS Code: وضع إطار للتعاون بين الحكومات والجهات العاملة في النقل البحري لتعزيز أمن السفن والموانئ."},
+  {q:"تم اعتماد ISPS Code كجزء من أي اتفاقية دولية؟",opts:["اتفاقية MARPOL","اتفاقية SOLAS","اتفاقية STCW"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"تم اعتماد ISPS Code كجزء من اتفاقية SOLAS."},
+  {q:"ما سبب إدخال ISPS Code إلى اتفاقية SOLAS؟",opts:["بسبب مشاكل التلوث البحري","بعد حوادث اصطدام متكررة","نتيجة للهجمات الإرهابية في 11 أيلول (سبتمبر) 2001 في أمريكا","بطلب من شركات التأمين"],a:2,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"سبب إدخال ISPS Code: نتيجة للهجمات الإرهابية في 11 أيلول (سبتمبر) 2001 في أمريكا."},
+  {q:"ما الحدث الذي شكل الدافع الأساسي لاعتماد مدونة ISPS؟",opts:["حوادث تسرب النفط","حوادث الغرق الجماعي","الهجمات الإرهابية في 11 سبتمبر 2001","القرصنة في القرن الإفريقي"],a:2,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"الحدث الذي شكل الدافع الأساسي لاعتماد مدونة ISPS هو الهجمات الإرهابية في 11 سبتمبر 2001."},
+  {q:"ما نوع المدونة التي يُصنّف تحتها ISPS Code؟",opts:["مدونة تقنية","مدونة أمنية","مدونة بيئية","مدونة طبية"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"ISPS Code يُصنّف كمدونة أمنية."},
+  {q:"ما الجهات التي يشملها تطبيق ISPS Code؟",opts:["فقط السفن التجارية","فقط الموانئ الكبيرة","الحكومات، شركات النقل البحري، السفن، والمرافئ","المسافرين عبر البحر"],a:2,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"الجهات التي يشملها تطبيق ISPS Code: الحكومات، شركات النقل البحري، السفن، والمرافئ."},
+  {q:"ما أهمية ISPS Code في النقل البحري؟",opts:["تنظيم حركة السفن في الموانئ","تقليل عدد أفراد الطاقم","حماية السفن والموانئ من المخاطر الأمنية","تسريع عمليات الشحن والتفريغ"],a:2,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"أهمية ISPS Code: حماية السفن والموانئ من المخاطر الأمنية."},
+  {q:"ما المقصود بالجزء \"A\" من ISPS Code؟",opts:["تعليمات غير ملزمة","أحكام اختيارية حسب الدولة","أحكام إلزامية","توجيهات خاصة بالركاب"],a:2,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"الجزء A من ISPS Code يتضمن أحكاماً إلزامية."},
+  {q:"ما المقصود بالجزء \"B\" من ISPS Code؟",opts:["قوانين صارمة يجب اتباعها","توصيات وأحكام استرشادية","مواد تدريبية","نصوص خاصة بالركاب"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"الجزء B من ISPS Code يتضمن توصيات وأحكاماً استرشادية."},
+  {q:"من الجهات الملزمة بتطبيق الجزء A من المدونة؟",opts:["فقط السفن","فقط المرافئ","جميع الدول الأعضاء في الاتفاقية","شركات التأمين فقط"],a:2,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"جميع الدول الأعضاء في الاتفاقية ملزمة بتطبيق الجزء A من المدونة."},
+  {q:"كيف يتم استخدام الجزء B من المدونة؟",opts:["كتفسير للقوانين الجنائية البحرية","بتقديم التوجيهات اللازمة لتطبيق الجزء A","كبديل عن الجزء A","في حالات الطوارئ فقط"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"الجزء B يُستخدم بتقديم التوجيهات اللازمة لتطبيق الجزء A."},
+  {q:"هل الدول ملزمة بتطبيق الجزء B من المدونة؟",opts:["نعم، التطبيق إجباري تماماً","لا، التطبيق اختياري ويعتمد على ظروف الدولة","فقط في حال وجود تهديد إرهابي","فقط للسفن الكبيرة"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"لا، تطبيق الجزء B اختياري ويعتمد على ظروف الدولة."},
+  {q:"متى دخلت ISPS Code حيز التنفيذ؟",opts:["1 يناير 2000","1 يوليو 2004","1 سبتمبر 2002","11 سبتمبر 2001"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"دخلت ISPS Code حيز التنفيذ في 1 يوليو 2004."},
+  {q:"ما هي أهم العناصر التي تتطلبها ISPS Code في السفن والمرافئ؟",opts:["زيادة عدد أفراد الطاقم","وجود نظام أمني موثق","إنشاء مكاتب حكومية على السفن","تغيير أعلام السفن حسب الدولة"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"أهم العناصر التي تتطلبها ISPS Code في السفن والمرافئ: وجود نظام أمني موثق."},
+  {q:"من الجهات المسؤولة عن مراقبة تطبيق ISPS Code؟",opts:["المنظمة الدولية للطيران","المنظمة البحرية الدولية IMO","الاتحاد الأوروبي فقط","شركات التأمين البحري"],a:1,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"الجهة المسؤولة عن مراقبة تطبيق ISPS Code هي المنظمة البحرية الدولية IMO."},
+  {q:"هل تسري ISPS Code على السفن الصغيرة الخاصة؟",opts:["نعم، بدون استثناء","لا، تسري على السفن الكبيرة فقط","تسري على السفن الخاضعة لاتفاقية SOLAS فقط","تسري على الزوارق الترفيهية فقط"],a:2,topic:'isps',src:'ISPS',page:'مدونة ISPS',ruleText:"ISPS Code تسري على السفن الخاضعة لاتفاقية SOLAS فقط."},
+  // ══ STCW ══
+  {q:"متى تم اعتماد اتفاقية STCW؟",opts:["A. 1984","B. 1995","C. 1978","D. 2010"],a:2,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"تم اعتماد اتفاقية STCW عام C. 1978."},
+  {q:"ما هو الهدف الأساسي من اتفاقية STCW؟",opts:["A. حماية البيئة البحرية","B. تحديد ساعات العمل للضباط","C. وضع معايير التدريب والإجازة والخفارة للملاحين","D. تحسين الملاحة الإلكترونية"],a:2,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"الهدف الأساسي من اتفاقية STCW: وضع معايير التدريب والإجازة والخفارة للملاحين."},
+  {q:"دخلت اتفاقية STCW حيز التنفيذ في:",opts:["A. 1995","B. 1984","C. 1978","D. 2012"],a:1,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"دخلت اتفاقية STCW حيز التنفيذ في B. 1984."},
+  {q:"أحد عيوب نسخة 1978 من الاتفاقية هو:",opts:["A. تجاهل التدريب العملي","B. اعتماد الممارسات الاحتيالية","C. ترك تحديد المعايير لكل دولة","D. عدم وجود ملحق فني"],a:2,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"أحد عيوب نسخة 1978: C. ترك تحديد المعايير لكل دولة."},
+  {q:"ما هو الأثر الأساسي لتعديلات 1995؟",opts:["A. إلغاء شهادات الملاحة","B. إنشاء فصول جديدة","C. معالجة التباين في مفهوم المتطلبات","D. إضافة التدريب القطبي"],a:2,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"الأثر الأساسي لتعديلات 1995: C. معالجة التباين في مفهوم المتطلبات."},
+  {q:"تنقسم الاتفاقية STCW إلى:",opts:["A. 5 فصول","B. 8 فصول","C. 10 فصول","D. 7 فصول"],a:1,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"تنقسم الاتفاقية STCW إلى B. 8 فصول."},
+  {q:"ما هو الفرق بين الجزء A و B في STCW؟",opts:["A. الجزء A يتعلق بالأمان، B بالتدريب","B. A الإلزامي، B اختياري","C. A يتعلق بالربان، B بالمحرك","D. A خاص بالضباط، B بالبحارة"],a:1,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"الفرق بين الجزء A و B في STCW: B. A الإلزامي، B اختياري."},
+  {q:"كم عدد الوظائف الأساسية في STCW؟",opts:["A. 5","B. 7","C. 3","D. 8"],a:1,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"عدد الوظائف الأساسية في STCW: B. 7."},
+  {q:"من يصنف ضمن \"مستوى الإدارة\"؟",opts:["A. كل الضباط","B. الربان وكبير المهندسين فقط","C. المهندس الثالث","D. البحري العادي"],a:1,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"يصنف ضمن مستوى الإدارة: B. الربان وكبير المهندسين فقط."},
+  {q:"في أي فصل نجد معايير الاتصالات الراديوية؟",opts:["A. الفصل الثالث","B. الفصل الرابع","C. الفصل الخامس","D. الفصل الثامن"],a:1,topic:'stcw',src:'STCW',page:'اتفاقية STCW',ruleText:"معايير الاتصالات الراديوية نجدها في B. الفصل الرابع."},
+  // ══ MLC ══
+  {q:"متى دخلت اتفاقية العمل البحري MLC 2006 حيز التنفيذ؟",opts:["A) 7 شباط 2006","B) 20 آب 2012","C) 20 آب 2013","D) 1 كانون الثاني 2010"],a:2,topic:'mlc',src:'MLC',page:'اتفاقية MLC',ruleText:"دخلت اتفاقية العمل البحري MLC 2006 حيز التنفيذ: C) 20 آب 2013."},
+  {q:"ما الجهة التي أعدت اتفاقية العمل البحري MLC 2006؟",opts:["A) المنظمة البحرية الدوليةIMO","B) منظمة العمل الدوليةILO","C) هيئة الأمم المتحدة","D) الاتحاد الدولي للبحارة"],a:1,topic:'mlc',src:'MLC',page:'اتفاقية MLC',ruleText:"أعدت اتفاقية العمل البحري MLC 2006 منظمة العمل الدولية ILO."},
+  {q:"ما المقصود بشهادة MLC؟",opts:["A) شهادة تأمين بحري","B) شهادة الصلاحية للإبحار","C) Maritime Labour Certificate","D) Document of Maritime Labour Compliance"],a:2,topic:'mlc',src:'MLC',page:'اتفاقية MLC',ruleText:"شهادة MLC تعني: C) Maritime Labour Certificate."},
+  {q:"ما المبدأ الذي تطبقه الاتفاقية على سفن الدول غير المصادقة عندما تدخل موانئ دول مصادقة؟",opts:["A) مبدأ دولة العلم","B) مبدأ السيادة البحرية","C) مبدأ لا مزيد من التساهل (No More Favorable Treatment)","D) مبدأ الحصانة الميناتية"],a:2,topic:'mlc',src:'MLC',page:'اتفاقية MLC',ruleText:"المبدأ المطبق: C) مبدأ لا مزيد من التساهل (No More Favorable Treatment)."},
+  {q:"أي من اللوائح التالية تتعلق بـ \"أماكن الإقامة وتقديم الوجبات\" في MLC؟",opts:["A) الباب الأول","B) الباب الثاني","C) الباب الثالث","D) الباب الخامس"],a:2,topic:'mlc',src:'MLC',page:'اتفاقية MLC',ruleText:"الباب المتعلق بأماكن الإقامة وتقديم الوجبات في MLC: C) الباب الثالث."},
+  // ══ MARPOL ══
+  {q:"ما أهم ميزة في المرفق الخامس من اتفاقية MARPOL؟",opts:["A) حظر تصريف مياه الصرف","B) فرض أنظمة تغليف للمواد الضارة","C) الحظر الكامل للتخلص من البلاستيك في البحر","D) الحد من انبعاثات الكبريت"],a:2,topic:'marpol',src:'MARPOL',page:'اتفاقية MARPOL',ruleText:"أهم ميزة في المرفق الخامس من اتفاقية MARPOL: C) الحظر الكامل للتخلص من البلاستيك في البحر."},
+  {q:"ما الذي يغطيه المرفق السادس من اتفاقية MARPOL؟",opts:["A) مياه الصرف الصحي","B) المواد المغلفة","C) التلوث النفطي","D) تلوث الهواء"],a:3,topic:'marpol',src:'MARPOL',page:'اتفاقية MARPOL',ruleText:"المرفق السادس من اتفاقية MARPOL يغطي: D) تلوث الهواء."},
+  {q:"ما السبب الرئيسي لاعتماد بروتوكول 1978 ضمن اتفاقية MARPOL؟",opts:["A) التغيرات في أنظمة السلامة","B) فشل اتفاقية 1954","C) حوادث ناقلات النفط بين 1976-1977","D) إدخال مرافقات جديدة"],a:2,topic:'marpol',src:'MARPOL',page:'اتفاقية MARPOL',ruleText:"السبب الرئيسي لاعتماد بروتوكول 1978: C) حوادث ناقلات النفط بين 1976-1977."},
+  // ══ ISM ══
+  {q:"ما الهدف من تعيين الشخص أو الأشخاص المعينين (Designated Person(s)) في نظام ISM؟",opts:["A) الإشراف على المعدات فقط","B) التفتيش على الشهادات البحرية","C) مراقبة السلامة ومنع التلوث وربط السفينة بالشركة","D) إصدار رواتب الطاقم"],a:2,topic:'ism',src:'ISM',page:'نظام إدارة السلامة ISM',ruleText:"الهدف من تعيين Designated Person(s) في نظام ISM: C) مراقبة السلامة ومنع التلوث وربط السفينة بالشركة."},
+  {q:"من هو المسؤول عن التأكد من أن الربان مؤهل ومطلع على نظام إدارة السلامة SMS؟",opts:["A) الإدارة البحرية","B) المنظمة البحرية الدولية","C) الشركة","D) المهندس الأول"],a:2,topic:'ism',src:'ISM',page:'نظام إدارة السلامة ISM',ruleText:"المسؤول عن التأكد من أن الربان مؤهل ومطلع على نظام SMS: C) الشركة."},
+  {q:"ما اسم الشهادة التي تُمنح للسفينة بعد التحقق من امتثالها لنظام السلامة؟",opts:["A) Ship Registration Certificate","B) Safety Management Certificate","C) Document of Compliance","D) Pollution Control Certificate"],a:1,topic:'ism',src:'ISM',page:'نظام إدارة السلامة ISM',ruleText:"الشهادة التي تُمنح للسفينة بعد التحقق من امتثالها لنظام السلامة: B) Safety Management Certificate."},
+  {q:"وفقاً لمدونة ISM، ما هي مسؤولية الربان الأساسية؟",opts:["A) قيادة السفينة فقط","B) مراجعة وثائق التزود بالوقود","C) تنفيذ سياسة السلامة وحماية البيئة وتحفيز الطاقم","D) الحفاظ على سجل الحضور اليومي"],a:2,topic:'ism',src:'ISM',page:'نظام إدارة السلامة ISM',ruleText:"مسؤولية الربان الأساسية وفقاً لمدونة ISM: C) تنفيذ سياسة السلامة وحماية البيئة وتحفيز الطاقم."},
+  {q:"ما الذي يجب أن تحتويه وثائق إدارة السلامة؟",opts:["A) أسماء الطاقم فقط","B) مخطط التفتيش الجمركي","C) الإجراءات والسياسات الخاصة بالسلامة","D) تعليمات الترفيه والراحة فقط"],a:2,topic:'ism',src:'ISM',page:'نظام إدارة السلامة ISM',ruleText:"يجب أن تحتوي وثائق إدارة السلامة على: C) الإجراءات والسياسات الخاصة بالسلامة."},
+];
+
+/* ── STATE ── */
+let order=[],idx=0,score=0,timeouts=0,wrongs=0,wrongTopics={};
+let timer=null,timeLeft=60;
+const CIRC=2*Math.PI*19;
+
+function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+
+function shuffleAndRestart(){
+  order=shuffleArray(BANK.map((_,i)=>i));
+  idx=0;score=0;timeouts=0;wrongs=0;wrongTopics={};
+  document.getElementById('scoreDisplay').textContent=0;
+  document.getElementById('scoreDenom').textContent=0;
+  document.getElementById('quizArea').style.display='';
+  document.getElementById('resultsScreen').classList.remove('show');
+  loadQ();
+}
+
+function loadQ(){
+  clearInterval(timer);timeLeft=60;
+  const qi=order[idx],q=BANK[qi],total=order.length;
+  document.getElementById('qNum').textContent=idx+1;
+  document.getElementById('qTotal').textContent=total;
+  document.getElementById('qNumBadge').textContent='Q '+String(idx+1).padStart(2,'0');
+  const src=document.getElementById('qSource');
+  src.textContent=q.src;
+  const srcMap={'MARPOL':'marpol','SOLAS':'solas','ISPS':'isps','STCW':'stcw','MLC':'mlc','ISM':'ism','IMO':'imo','القانون البحري':'law'};
+  src.className='q-source '+(srcMap[q.src]||'law');
+  document.getElementById('qText').textContent=q.q;
+  document.getElementById('progressFill').style.width=((idx/total)*100)+'%';
+  const opts=document.getElementById('optionsContainer');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='opt';d.dataset.i=i;
+    d.innerHTML=`<span>${o}</span><span class="opt-letter">${['A','B','C'][i]}</span>`;
+    d.onclick=()=>answer(i,q);
+    opts.appendChild(d);
+  });
+  document.getElementById('rulePanel').classList.remove('show');
+  document.getElementById('btnNext').classList.remove('show');
+  updateTimer();
+  timer=setInterval(()=>{
+    timeLeft--;updateTimer();
+    if(timeLeft<=0){clearInterval(timer);onTimeout(q);}
+  },1000);
+}
+
+function updateTimer(){
+  const pct=timeLeft/60;
+  const arc=document.getElementById('timerArc');
+  arc.style.strokeDashoffset=CIRC*(1-pct);
+  arc.style.stroke=timeLeft<=10?'var(--wrong)':timeLeft<=20?'var(--gold-m)':'var(--signal)';
+  document.getElementById('timerVal').textContent=timeLeft;
+}
+
+function answer(i,q){
+  clearInterval(timer);
+  document.querySelectorAll('.opt').forEach(d=>{
+    d.classList.add('disabled');
+    const di=parseInt(d.dataset.i);
+    if(di===q.a)d.classList.add('correct');
+    else if(di===i&&i!==q.a)d.classList.add('wrong');
+  });
+  const answered=document.getElementById('scoreDenom');
+  answered.textContent=parseInt(answered.textContent)+1;
+  if(i===q.a){score++;document.getElementById('scoreDisplay').textContent=score;}
+  else{wrongs++;wrongTopics[q.topic]=(wrongTopics[q.topic]||0)+1;}
+  showRulePanel(q);
+  document.getElementById('btnNext').classList.add('show');
+}
+
+function onTimeout(q){
+  timeouts++;
+  wrongTopics[q.topic]=(wrongTopics[q.topic]||0)+1;
+  document.querySelectorAll('.opt').forEach(d=>{
+    d.classList.add('disabled');
+    if(parseInt(d.dataset.i)===q.a)d.classList.add('correct');
+  });
+  const f=document.getElementById('timeoutFlash');
+  f.className='timeout-flash flash';
+  setTimeout(()=>{f.className='timeout-flash'},700);
+  const ans=document.getElementById('scoreDenom');
+  ans.textContent=parseInt(ans.textContent)+1;
+  showRulePanel(q);
+  document.getElementById('btnNext').classList.add('show');
+}
+
+function showRulePanel(q){
+  document.getElementById('ruleBadge').textContent=q.src+' — '+q.topic.split('-').slice(1).join(' ').toUpperCase();
+  document.getElementById('pageBadge').textContent=q.page;
+  document.getElementById('ruleText').textContent=q.ruleText;
+  document.getElementById('rulePanel').classList.add('show');
+}
+
+function nextQ(){
+  idx++;
+  if(idx>=order.length){showResults();return;}
+  loadQ();
+}
+
+function showResults(){
+  clearInterval(timer);
+  document.getElementById('quizArea').style.display='none';
+  const rs=document.getElementById('resultsScreen');rs.classList.add('show');
+  const total=order.length,pct=score/total;
+  document.getElementById('rsNum').textContent=score;
+  document.getElementById('rsDenom').textContent='/'+total;
+  document.getElementById('rsCorrect').textContent=score;
+  document.getElementById('rsWrong').textContent=wrongs;
+  document.getElementById('rsTimeout').textContent=timeouts;
+  const arc=document.getElementById('resultsArc');
+  const c2=2*Math.PI*56;
+  arc.style.strokeDashoffset=c2*(1-pct);
+  arc.style.stroke=pct>=.8?'var(--correct)':pct>=.6?'var(--gold-m)':'var(--wrong)';
+  const grade=pct>=.9?'EXCELLENT':pct>=.8?'VERY GOOD':pct>=.7?'GOOD':pct>=.6?'PASS':'NEEDS REVIEW';
+  document.getElementById('resultsTitle').textContent=score+' / '+total;
+  document.getElementById('resultsGrade').textContent=grade;
+  const wk=document.getElementById('weakRulesSection');
+  const wl=document.getElementById('weakRulesList');
+  wl.innerHTML='';
+  const entries=Object.entries(wrongTopics).sort((a,b)=>b[1]-a[1]);
+  if(entries.length){
+    wk.classList.add('show');
+    entries.forEach(([t,c])=>{
+      const d=document.createElement('div');d.className='weak-rule-item';
+      d.innerHTML=`<span class="weak-rule-num">${c}✗</span><span class="weak-rule-name">${TOPICS[t]||t}</span>`;
+      wl.appendChild(d);
+    });
+  }
+}
+
+shuffleAndRestart();
+</script>
+
+</body></html>
